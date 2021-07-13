@@ -21,7 +21,7 @@ def edit_me():
                              4,2, # Defender H,S
                              traits1)
 
-  traits2 = {'agile': True}
+  traits2 = {'agile': True, 'infantry':True}
   exp2 = HGB_Dice_Experiment(2,4, # Attacker Dice, Attacker Skill
                              2,4, # Defender Dice, Defender Skill
                              6,6, # Weapon Damage, Defender AR
@@ -121,7 +121,7 @@ class HGB_Dice_Experiment:
             damage[i] = cal
 
         if infantry:
-          damage[i] = max(2,damage[i])
+          damage[i] = min(2,damage[i])
         if field_armor and damage[i] > 0:
           damage[i] = max(1,damage[i]-1)
         for f in range(dot):
