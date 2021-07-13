@@ -197,7 +197,7 @@ def compare_experiments(experiments):
     for exp in experiments:
       exp_traits = []
       for title in trait_titles:
-        exp_traits.append("" if title not in exp.traits else exp.traits[title])
+        exp_traits.append(" " if title not in exp.traits else exp.traits[title])
       traits.append(exp_traits)
     for i in range(len(trait_titles)):
       form = " {{0:>{0}}}".format(width)
