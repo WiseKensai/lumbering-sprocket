@@ -11,22 +11,26 @@ def edit_me():
         * field_armor: True/False
         * ap         : #
         * dot        : # (use this for fire, set to 1 for haywire or corrosion)
-        *
+
+      Below is an experiment of a Jaguar shooting at a Hunter in cover.
+      Either you have a LLC or a HRF.
   """
   traits1 = {'precise': True,
-             'ap': 1}
-  exp1 = HGB_Dice_Experiment(2,4, # Attacker Dice, Attacker Skill
-                             2,4, # Defender Dice, Defender Skill
+             'advanced': True}
+  exp1 = HGB_Dice_Experiment(2,3, # Attacker Dice, Attacker Skill
+                             3,4, # Defender Dice, Defender Skill
                              6,6, # Weapon Damage, Defender AR
                              4,2, # Defender H,S
-                             traits1)
+                             traits1,
+                             name="LLC Opt")
 
-  traits2 = {'agile': True, 'infantry':True}
-  exp2 = HGB_Dice_Experiment(2,4, # Attacker Dice, Attacker Skill
-                             2,4, # Defender Dice, Defender Skill
-                             6,6, # Weapon Damage, Defender AR
+  traits2 = {'precise': True}
+  exp2 = HGB_Dice_Experiment(2,3, # Attacker Dice, Attacker Skill
+                             3,4, # Defender Dice, Defender Skill
+                             8,6, # Weapon Damage, Defender AR
                              4,2, # Defender H,S
-                             traits2)
+                             traits2,
+                             name="HRF Opt")
 
   compare_experiments([exp1,exp2])
 
@@ -62,7 +66,8 @@ class HGB_Dice_Experiment:
                hull,structure,
                traits,
                nsamples=10000,
-               target_damage=2):
+               target_damage=2,
+               name="Experiment"):
     self.diceA = diceA
     self.skillA = skillA
     self.diceB = diceB
@@ -75,6 +80,7 @@ class HGB_Dice_Experiment:
     self.nsamples = nsamples
     self.target_damage = target_damage
 
+    self.name = name
     self.samples = self.monte_carlo_mos()
     self.damage = self.process_damage()
     self.damage_hist = collections.Counter(self.damage)
@@ -136,7 +142,7 @@ class HGB_Dice_Experiment:
         chance = histogram[i]*100.0/len(self.samples)
         if i == 0 and not agile:
           hit = hit + chance
-        elif i < 0:
+        elif i > 0:
           hit = hit + chance
 
       return hit
@@ -158,16 +164,18 @@ class HGB_Dice_Experiment:
     return target,cripple,kill
 
   def __str__(self):
+    ret = ""
     histogram = collections.Counter(self.samples)
-    print("Mean MoS: {0:3.2f}".format(sum(self.samples)*1.0/len(self.samples)))
-    print("MoS: % chance")
+    ret = ret + "Mean MoS: {0:3.2f}\n".format(sum(self.samples)*1.0/len(self.samples))
+    ret = ret + "MoS: % chance\n"
     for i in range(min(self.samples),max(self.samples)+1):
-      print("  {0:2d}: {1:6.3f}".format(i,histogram[i]*100.0/len(self.samples)))
+      ret = ret + "  {0:2d}: {1:6.3f}\n".format(i,histogram[i]*100.0/len(self.samples))
 
-    print("Mean Damage: {0:3.2f}".format(sum(self.samples)*1.0/len(self.samples)))
-    print("Damage: % chance")
-    for i in range(min(self.samples),max(self.samples)+1):
-      print("  {0:2d}: {1:6.3f}".format(i,histogram[i]*100.0/len(self.samples)))
+    ret = ret + "Mean Damage: {0:3.2f}\n".format(sum(self.damage)*1.0/len(self.damage))
+    ret = ret + "Damage: % chance\n"
+    for i in range(min(self.damage),max(self.damage)+1):
+      ret = ret + "  {0:2d}: {1:6.3f}\n".format(i,histogram[i]*100.0/len(self.damage))
+    return ret
 
 
 def compare_experiments(experiments):
@@ -176,6 +184,11 @@ def compare_experiments(experiments):
 
     width = 15
 
+    form = " {{0:>{0}}}".format(width)
+    print(form.format(" "),end="")
+    for exp in experiments:
+      print(form.format(exp.name),end="")
+    print("")
 
     metadata_titles = ["Dice","Skill","Dam v AR","H/S"]
     metadata = []
